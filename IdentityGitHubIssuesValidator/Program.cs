@@ -42,7 +42,7 @@ namespace IdentityGitHubIssuesValidator
         static async Task<Issue> GetIssueAsync(IssueRequest request)
         {
             Issue issue = null;
-            //var byteArray = Encoding.ASCII.GetBytes("jeevanbmanoj@gmail.com:Anoushka@007");
+            //var byteArray = Encoding.ASCII.GetBytes("username:password");
             //client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", Convert.ToBase64String(byteArray));
             string path = GetGitHubIssueApiUrl(request.Owner, request.RepoName, request.IssueId);
             HttpResponseMessage response = await client.GetAsync(path);
@@ -91,13 +91,15 @@ namespace IdentityGitHubIssuesValidator
                         {
                             firstSheet.Cells[row, stateCol].Value ="ERROR";
                             Console.WriteLine("Error  at row  " + row);
+                            Console.WriteLine(GetGitHubIssueApiUrl(request.Owner, request.RepoName, request.IssueId));
                             continue;
                         }
                         else
                             firstSheet.Cells[row, stateCol].Value = issue.State;
                         if (!issue.State.Equals("open")) 
                         {
-                            Console.WriteLine("Mistake found at row  " +row+ " " + request.Owner +" " +request.RepoName +" " +request.IssueId);
+                            Console.WriteLine(GetGitHubIssueApiUrl(request.Owner,request.RepoName,request.IssueId));
+                           // Console.WriteLine("Mistake found at row  " +row+ " " + request.Owner +" " +request.RepoName +" " +request.IssueId);
                             mistakeCount++;
                         }
                 
