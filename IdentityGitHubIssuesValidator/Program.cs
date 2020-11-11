@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
@@ -43,7 +44,7 @@ namespace IdentityGitHubIssuesValidator
         {
             Issue issue = null;
             //var byteArray = Encoding.ASCII.GetBytes("username:password");
-            //client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", Convert.ToBase64String(byteArray));
+            //client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", Convert.ToBase64String(byteArray));           
             string path = GetGitHubIssueApiUrl(request.Owner, request.RepoName, request.IssueId);
             HttpResponseMessage response = await client.GetAsync(path);
             if (response.IsSuccessStatusCode)
@@ -59,11 +60,13 @@ namespace IdentityGitHubIssuesValidator
         {
             try
             {
+                string errors = "";
+                string dataAnomalies = "";
                 client.DefaultRequestHeaders.Add("User-Agent", "request");
-                client.DefaultRequestHeaders.Add("Authorization", "Basic <token from basic auth of postman> ");
+                client.DefaultRequestHeaders.Add("Authorization", "Basic amVldmFuYm1hbm9qQGdtYWlsLmNvbTpKb25pdGFAMDA3JA==");
                 ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
 
-                using (var package = new ExcelPackage(new FileInfo(@"C:\data\henrikm.xlsx")))
+                using (var package = new ExcelPackage(new FileInfo(@"C:\data\AllData1110.xlsx")))
                 {
                     var firstSheet = package.Workbook.Worksheets["Sheet1"];
                     int colCount = firstSheet.Dimension.End.Column;  //get Column Count
@@ -91,20 +94,29 @@ namespace IdentityGitHubIssuesValidator
                         {
                             firstSheet.Cells[row, stateCol].Value ="ERROR";
                             Console.WriteLine("Error  at row  " + row);
-                            Console.WriteLine(GetGitHubIssueApiUrl(request.Owner, request.RepoName, request.IssueId));
+                            errors += "\n" + request.Owner + "    " + request.RepoName + "  NA  " + firstSheet.Cells[row, repoUrlCol].Value?.ToString().Trim();
+                            Console.WriteLine(firstSheet.Cells[row, repoUrlCol].Value?.ToString().Trim());
                             continue;
                         }
                         else
                             firstSheet.Cells[row, stateCol].Value = issue.State;
                         if (!issue.State.Equals("open")) 
                         {
-                            Console.WriteLine(GetGitHubIssueApiUrl(request.Owner,request.RepoName,request.IssueId));
-                           // Console.WriteLine("Mistake found at row  " +row+ " " + request.Owner +" " +request.RepoName +" " +request.IssueId);
+                            dataAnomalies+="\n"+ request.Owner+"    "+request.RepoName+"    "+issue.Id+"     " + firstSheet.Cells[row, repoUrlCol].Value?.ToString().Trim();
+                            Console.WriteLine(firstSheet.Cells[row, repoUrlCol].Value?.ToString().Trim());
                             mistakeCount++;
                         }
                 
                     }
                     package.Save();
+                    using (StreamWriter writer = new StreamWriter(@"C:\data\errors.txt", false))
+                    {
+                        writer.Write(errors);
+                    }
+                    using (StreamWriter writer = new StreamWriter(@"C:\data\Data_Anomalies.txt", false))
+                    {
+                        writer.Write(dataAnomalies);
+                    }
                     Console.WriteLine(" Total " + totalIssues + " Mistakes " + mistakeCount + "Percentage" + (mistakeCount / totalIssues) * 100 + "%");
                 }
             }
