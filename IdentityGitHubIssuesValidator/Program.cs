@@ -63,7 +63,7 @@ namespace IdentityGitHubIssuesValidator
                 string errors = "";
                 string dataAnomalies = "";
                 client.DefaultRequestHeaders.Add("User-Agent", "request");
-                client.DefaultRequestHeaders.Add("Authorization", "Basic amVldmFuYm1hbm9qQGdtYWlsLmNvbTpKb25pdGFAMDA3JA==");
+                client.DefaultRequestHeaders.Add("Authorization", "<<from postman>>");
                 ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
 
                 using (var package = new ExcelPackage(new FileInfo(@"C:\data\AllData1110.xlsx")))
